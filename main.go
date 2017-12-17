@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"time"
 )
 
 type Server struct {
@@ -14,6 +15,15 @@ func (s Server) Run() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	ticker := time.NewTicker(time.Second * 5)
+	go func() {
+		for range ticker.C {
+			for _, client := range s.clients {
+				client.Write([]byte("ALCOHOL\n"))
+			}
+		}
+	}()
 
 	for {
 		conn, err := listener.Accept()
@@ -27,7 +37,6 @@ func (s Server) Run() {
 }
 
 func (s Server) Handle(conn net.Conn) {
-	defer conn.Close()
 	conn.Write([]byte("Hello\n"))
 }
 
