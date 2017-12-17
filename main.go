@@ -18,7 +18,11 @@ func main() {
 			fmt.Println(err)
 		}
 		fmt.Printf("Client %v connected.\n", conn.RemoteAddr())
-		conn.Write([]byte("Hello\n"))
-		conn.Close()
+		go handle(conn)
 	}
+}
+
+func handle(conn net.Conn) {
+	defer conn.Close()
+	conn.Write([]byte("Hello\n"))
 }
