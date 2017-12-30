@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net"
+	"net/textproto"
 	"time"
 )
 
@@ -37,6 +40,19 @@ func (s Server) Run() {
 func (s Server) Handle(conn net.Conn) {
 	conn.Write([]byte("Hello\n"))
 	s.SendToAll(fmt.Sprintf("%v", conn) + " has connected\n")
+
+	reader := textproto.NewReader(bufio.NewReader(conn))
+	for {
+		msg, err := reader.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println(msg)
+	}
 }
 
 func (s Server) SendToAll(msg string) {
