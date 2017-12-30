@@ -19,9 +19,7 @@ func (s Server) Run() {
 	ticker := time.NewTicker(time.Second * 5)
 	go func() {
 		for range ticker.C {
-			for _, client := range s.clients {
-				client.Write([]byte("ALCOHOL\n"))
-			}
+			s.SendToAll("ALCOHOL\n")
 		}
 	}()
 
@@ -38,6 +36,12 @@ func (s Server) Run() {
 
 func (s Server) Handle(conn net.Conn) {
 	conn.Write([]byte("Hello\n"))
+}
+
+func (s Server) SendToAll(msg string) {
+	for _, client := range s.clients {
+		client.Write([]byte(msg))
+	}
 }
 
 func main() {
