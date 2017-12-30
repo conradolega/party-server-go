@@ -36,6 +36,7 @@ func (s Server) Run() {
 
 func (s Server) Handle(conn net.Conn) {
 	conn.Write([]byte("Hello\n"))
+	s.SendToAll(fmt.Sprintf("%v", conn) + " has connected\n")
 }
 
 func (s Server) SendToAll(msg string) {
