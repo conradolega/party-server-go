@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net"
+	"net/http"
 	"net/textproto"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Server struct {
@@ -79,6 +82,11 @@ func init() {
 }
 
 func main() {
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		log.Fatal(http.ListenAndServe(":3124", nil))
+	}()
+
 	fmt.Println("Starting server...")
 	server := Server{}
 	server.Run()
