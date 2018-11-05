@@ -7,6 +7,8 @@ import (
 	"net"
 	"net/textproto"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type Server struct {
@@ -32,6 +34,7 @@ func (s Server) Run() {
 			fmt.Println(err)
 		}
 		fmt.Printf("Client %v connected.\n", conn.RemoteAddr())
+		connections.With(prometheus.Labels{}).Inc()
 		s.clients = append(s.clients, conn)
 		go s.Handle(conn)
 	}
@@ -59,6 +62,20 @@ func (s Server) SendToAll(msg string) {
 	for _, client := range s.clients {
 		client.Write([]byte(msg))
 	}
+}
+
+var (
+	connections = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "connections_total",
+			Help: "Number of clients connected.",
+		},
+		[]string{},
+	)
+)
+
+func init() {
+	prometheus.MustRegister(connections)
 }
 
 func main() {
