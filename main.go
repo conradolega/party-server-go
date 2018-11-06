@@ -45,6 +45,7 @@ func (s Server) Run() {
 
 func (s Server) Handle(conn net.Conn) {
 	conn.Write([]byte("Hello\n"))
+	messagesSent.With(prometheus.Labels{"type": "hello"}).Inc()
 	s.SendToAll(fmt.Sprintf("%v", conn) + " has connected\n")
 
 	reader := textproto.NewReader(bufio.NewReader(conn))
@@ -64,6 +65,7 @@ func (s Server) Handle(conn net.Conn) {
 func (s Server) SendToAll(msg string) {
 	for _, client := range s.clients {
 		client.Write([]byte(msg))
+		messagesSent.With(prometheus.Labels{"type": msg}).Inc()
 	}
 }
 
@@ -75,10 +77,18 @@ var (
 		},
 		[]string{},
 	)
+	messagesSent = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "messages_total",
+			Help: "Number of messages sent",
+		},
+		[]string{"type"},
+	)
 )
 
 func init() {
 	prometheus.MustRegister(connections)
+	prometheus.MustRegister(messagesSent)
 }
 
 func main() {
