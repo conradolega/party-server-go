@@ -8,10 +8,17 @@ import (
 	"net"
 	"net/http"
 	"net/textproto"
+	"os"
 	"time"
 
+	"github.com/op/go-logging"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var logger = logging.MustGetLogger("logger")
+var logFormat = logging.MustStringFormatter(
+	`%{time} %{shortfunc} %{level} %{id:03x} %{message}`,
 )
 
 type Server struct {
@@ -92,12 +99,16 @@ func init() {
 }
 
 func main() {
+	backend := logging.NewLogBackend(os.Stderr, "", 0)
+	backendFormatter := logging.NewBackendFormatter(backend, logFormat)
+	logging.SetBackend(backendFormatter)
+
 	http.Handle("/metrics", promhttp.Handler())
 	go func() {
 		log.Fatal(http.ListenAndServe(":3124", nil))
 	}()
 
-	fmt.Println("Starting server...")
+	logger.Info("Starting server...")
 	server := Server{}
 	server.Run()
 }
