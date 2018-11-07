@@ -28,7 +28,7 @@ type Server struct {
 func (s Server) Run() {
 	listener, err := net.Listen("tcp", "0.0.0.0:3123")
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 	}
 
 	ticker := time.NewTicker(time.Second * 5)
@@ -41,9 +41,9 @@ func (s Server) Run() {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println(err)
+			logger.Error(err)
 		}
-		fmt.Printf("Client %v connected.\n", conn.RemoteAddr())
+		logger.Infof("Client %v connected.\n", conn.RemoteAddr())
 		connections.With(prometheus.Labels{}).Inc()
 		s.clients = append(s.clients, conn)
 		go s.Handle(conn)
@@ -62,10 +62,10 @@ func (s Server) Handle(conn net.Conn) {
 			break
 		}
 		if err != nil {
-			fmt.Println(err)
+			logger.Error(err)
 		}
 
-		fmt.Println(msg)
+		logger.Info(msg)
 	}
 }
 
