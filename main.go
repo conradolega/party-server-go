@@ -99,7 +99,12 @@ func init() {
 }
 
 func main() {
-	backend := logging.NewLogBackend(os.Stderr, "", 0)
+	logFile, err := os.OpenFile("party.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println("Failed to open file")
+	}
+
+	backend := logging.NewLogBackend(logFile, "", 0)
 	backendFormatter := logging.NewBackendFormatter(backend, logFormat)
 	logging.SetBackend(backendFormatter)
 
